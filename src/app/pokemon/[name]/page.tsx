@@ -3,8 +3,11 @@ import Link from 'next/link';
 import { getPokemonByName } from '@/lib/pokemon';
 import Breadcrumb from '@/components/Breadcrumb';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 
-export async function generateMetadata({ params }: { params: { name: string } }) {
+export async function generateMetadata({
+    params,
+}: PokemonDetailProps): Promise<Metadata> {
     const pokemonName = params.name.charAt(0).toUpperCase() + params.name.slice(1);
     return {
         title: `${pokemonName} | Pokemon Search`,
@@ -12,7 +15,14 @@ export async function generateMetadata({ params }: { params: { name: string } })
     };
 }
 
-export default async function PokemonDetail({ params }: { params: { name: string } }) {
+
+interface PokemonDetailProps {
+    params: {
+        name: string;
+    };
+}
+
+export default async function PokemonDetail({ params }: PokemonDetailProps) {
     const name = params.name;
 
     try {
@@ -33,7 +43,12 @@ export default async function PokemonDetail({ params }: { params: { name: string
         return (
             <main className="container mx-auto px-4 py-8">
                 <Breadcrumb />
-
+                <Link
+                    href="/"
+                    className="inline-flex items-center mb-4 text-blue-600 hover:text-blue-800"
+                >
+                    Back
+                </Link>
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                     <div className="md:flex">
                         <div className="md:w-1/2 bg-gray-100 p-6 flex items-center justify-center">
@@ -113,15 +128,6 @@ export default async function PokemonDetail({ params }: { params: { name: string
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div className="mt-6 text-center">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                        Back to All Pokémon
-                    </Link>
                 </div>
             </main>
         );

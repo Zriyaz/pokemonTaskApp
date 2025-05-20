@@ -1,12 +1,10 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import React, { useRef, useCallback, memo, useState } from 'react';
 import { usePokemonFilter } from '@/lib/hooks';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useRef, useCallback, memo, useState } from 'react';
 
-// Memoized Pokemon Card component to prevent unnecessary re-renders
 const PokemonCard = memo(({
     pokemon,
     ref
@@ -75,11 +73,7 @@ const PokemonCard = memo(({
 PokemonCard.displayName = 'PokemonCard';
 
 export default function PokemonList() {
-    const searchParams = useSearchParams();
-    const typeParam = searchParams.get('type') || 'all';
-    const searchParam = searchParams.get('search') || '';
-
-    const { pokemons, loading, error, hasMore, loadMore } = usePokemonFilter(typeParam);
+    const { pokemons, loading, error, hasMore, loadMore, searchTerm } = usePokemonFilter();
     const observer = useRef<IntersectionObserver | null>(null);
     const lastPokemonElementRef = useCallback((node: Element | null) => {
         if (loading) return;
@@ -101,13 +95,6 @@ export default function PokemonList() {
         if (node) observer.current.observe(node);
     }, [loading, hasMore, loadMore]);
 
-    // Filter pokemons by search term from URL - memoize this for performance
-    const filteredPokemons = useCallback(() => {
-        return pokemons.filter(pokemon =>
-            pokemon.name.toLowerCase().includes((searchParam || '').toLowerCase())
-        );
-    }, [pokemons, searchParam])();
-
     // Component for showing the initial loading state
     const FullLoader = () => (
         <div className="flex flex-col justify-center items-center py-16 space-y-4">
@@ -115,7 +102,7 @@ export default function PokemonList() {
                 <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 rounded-full animate-spin border-t-transparent"></div>
                 <div className="absolute top-2 left-2 w-12 h-12 border-4 border-red-500 rounded-full animate-spin border-t-transparent animate-[spin_1s_linear_infinite_reverse]"></div>
             </div>
-            <p className="text-lg font-medium text-gray-700">Loading Pokémon...</p>
+            <p className="text-lg font-medium text-gray-700">Loading Pokemon...</p>
         </div>
     );
 
@@ -131,22 +118,27 @@ export default function PokemonList() {
         );
     }
 
-    if (filteredPokemons.length === 0) {
+    if (pokemons.length === 0) {
         return (
             <div className="text-center py-8">
-                No Pokémon found matching your search criteria.
+                No Pokemon found matching your search criteria.
             </div>
         );
     }
 
     return (
         <div className="space-y-8">
+            {searchTerm && (
+                <div className="text-center text-gray-600 mb-4">
+                    Found {pokemons.length} Pokemon matching "{searchTerm}"
+                </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredPokemons.map((pokemon, index) => (
+                {pokemons.map((pokemon, index) => (
                     <PokemonCard
                         key={pokemon.id}
                         pokemon={pokemon}
-                        ref={index === filteredPokemons.length - 1 ? lastPokemonElementRef : undefined}
+                        ref={index === pokemons.length - 1 ? lastPokemonElementRef : undefined}
                     />
                 ))}
             </div>
@@ -160,14 +152,7 @@ export default function PokemonList() {
                             <div className="h-6 w-6 rounded-full bg-white"></div>
                         </div>
                     </div>
-                    <p className="text-gray-500 font-medium">Loading more Pokémon...</p>
-                </div>
-            )}
-
-            {/* End of results message */}
-            {!hasMore && pokemons.length > 0 && !loading && (
-                <div className="text-center py-6 text-gray-500 border-t border-gray-200">
-                    <p>You've reached the end of the Pokédex!</p>
+                    <p className="text-gray-500 font-medium">Loading more Pokemon...</p>
                 </div>
             )}
         </div>

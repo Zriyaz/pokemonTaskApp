@@ -12,21 +12,34 @@ interface BreadcrumbItem {
 export default function Breadcrumb() {
     const pathname = usePathname();
 
+    console.log(pathname);
+
     // Skip if we're on the home page
     if (pathname === '/') return null;
 
     // Split the path into segments
     const segments = pathname.split('/').filter(Boolean);
 
-    // Create breadcrumb items
+
+    // Create simplified breadcrumb items - just Home > PokemonName
     const breadcrumbs: BreadcrumbItem[] = [
-        { name: 'Home', href: '/' },
-        ...segments.map((segment, index) => ({
-            name: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
-            href: `/${segments.slice(0, index + 1).join('/')}`,
-            current: index === segments.length - 1,
-        })),
+        { name: 'Home', href: '/' }
     ];
+
+    // Add the last segment if it exists (the Pokemon name)
+    if (segments.length > 0) {
+        // Get the last segment (Pokemon name)
+        const lastSegment = segments[segments.length - 1];
+
+        // Format the name properly
+        const pokemonName = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, ' ');
+
+        breadcrumbs.push({
+            name: pokemonName,
+            href: pathname,
+            current: true
+        });
+    }
 
     return (
         <nav className="flex mb-6" aria-label="Breadcrumb">

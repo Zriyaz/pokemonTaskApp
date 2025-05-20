@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { PokemonProvider } from "@/lib/hooks";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,7 +45,9 @@ export default function RootLayout({
           </div>
         </header>
 
-        {children}
+        <PokemonProvider>
+          {children}
+        </PokemonProvider>
 
         <footer className="bg-gray-800 text-white py-6 mt-12">
           <div className="container mx-auto px-4 text-center">
