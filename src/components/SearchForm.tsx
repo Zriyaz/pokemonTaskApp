@@ -3,26 +3,16 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 import { PokemonType } from '@/lib/pokemon';
-import { usePokemonFilter } from '@/lib/hooks';
 
 export default function SearchForm({ types }: { types: PokemonType[] }) {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const initialType = searchParams.get('type') || 'all';
-    const initialSearch = searchParams.get('search') || '';
-
-    const [selectedType, setSelectedType] = useState(initialType);
-    const [searchTerm, setSearchTerm] = useState(initialSearch);
-
-    // Use the hook to fetch Pokemon and manage state
-    const { setSelectedType: setFilterType, searchPokemon } = usePokemonFilter(initialType);
+    const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'all');
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-
-        // Call the API search function
-        searchPokemon(searchTerm);
 
         const params = new URLSearchParams();
         if (selectedType && selectedType !== 'all') params.set('type', selectedType);
@@ -34,23 +24,11 @@ export default function SearchForm({ types }: { types: PokemonType[] }) {
         router.push(url);
     };
 
-    // Update hook's selectedType when the form's selectedType changes
-    useEffect(() => {
-        setFilterType(selectedType);
-    }, [selectedType, setFilterType]);
-
     // Update form when URL params change
     useEffect(() => {
-        const typeParam = searchParams.get('type') || 'all';
-        const searchParam = searchParams.get('search') || '';
-
-        setSelectedType(typeParam);
-        setSearchTerm(searchParam);
-
-        // Update the filter hook with the new type from URL
-        setFilterType(typeParam);
-
-    }, [searchParams, setFilterType]);
+        setSelectedType(searchParams.get('type') || 'all');
+        setSearchTerm(searchParams.get('search') || '');
+    }, [searchParams]);
 
     return (
         <form onSubmit={handleSubmit} className="mb-8">
@@ -81,7 +59,7 @@ export default function SearchForm({ types }: { types: PokemonType[] }) {
                     <input
                         type="text"
                         id="search"
-                        placeholder="Search Pokemon..."
+                        placeholder="Search Pokémon..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
